@@ -145,44 +145,44 @@ else
     echo "解压miaospeed失败"
     exit 0
 fi
-
-
-
-if command -v systemctl &> /dev/null; then
-    echo "systemctl命令存在 使用systemctl运行miaospeed"
-echo "[Unit]
-Description=miaospeed
-After=network.target
-
-[Install]
-WantedBy=multi-user.target
-
-[Service]
-Type=simple
-WorkingDirectory=${install_path}
-ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port} ${mtls} ${config} ${connthread}
-Restart=alway" > /etc/systemd/system/miaospeed.service
-    systemctl daemon-reload
-    systemctl start miaospeed
-    systemctl enable miaospeed
-    echo "可以使用 systemctl [start/restart/stop] miaospeed 来[启动/重启/停止]miaospeed"
-else
-    echo "
-#!/bin/sh /etc/rc.common
-
-START=99
-STOP=10
-
-start() {
-    echo 'Starting miaospeed'
-    ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port} ${mtls} ${config} ${connthread} &
-}
-
-stop() {
-    echo 'Stopping miaospeed'
-    killall -9 miaospeed.meta
-}"> /etc/init.d/miaospeed
-    chmod +x /etc/init.d/miaospeed
-    /etc/init.d/miaospeed start
-    /etc/init.d/miaospeed enable
+if [ ! $update ];then
+    if command -v systemctl &> /dev/null; then
+        echo "systemctl命令存在 使用systemctl运行miaospeed"
+    echo "[Unit]
+    Description=miaospeed
+    After=network.target
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+    [Service]
+    Type=simple
+    WorkingDirectory=${install_path}
+    ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port} ${mtls} ${config} ${connthread}
+    Restart=alway" > /etc/systemd/system/miaospeed.service
+        systemctl daemon-reload
+        systemctl start miaospeed
+        systemctl enable miaospeed
+        echo "可以使用 systemctl [start/restart/stop] miaospeed 来[启动/重启/停止]miaospeed"
+    else
+        echo "
+    #!/bin/sh /etc/rc.common
+    
+    START=99
+    STOP=10
+    
+    start() {
+        echo 'Starting miaospeed'
+        ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port} ${mtls} ${config} ${connthread} &
+    }
+    
+    stop() {
+        echo 'Stopping miaospeed'
+        killall -9 miaospeed.meta
+    }"> /etc/init.d/miaospeed
+        chmod +x /etc/init.d/miaospeed
+        /etc/init.d/miaospeed start
+        /etc/init.d/miaospeed enable
+        echo "可以使用 /etc/init.d/miaospeed [start/stop] miaospeed 来[启动/停止]miaospeed"
+    fi
 fi
