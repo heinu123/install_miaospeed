@@ -111,8 +111,15 @@ example:
 
 # Example
 
+token模式:
 ```shell
 wget -O install.sh https://raw.githubusercontent.com/heinu123/install_miaospeed/main/install.sh
 bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode token --token miaospeed --mtls --connthread 8
+```
+
+whitelist模式:
+```shell
+wget -O install.sh https://raw.githubusercontent.com/heinu123/install_miaospeed/main/install.sh
+bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode whitelist --botid 114514 --mtls --connthread 8
 ```
 
