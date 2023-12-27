@@ -4,22 +4,17 @@
 # by https://github.com/heinu123
 
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "使用root用户执行."
-    exit 1
-fi
-
 if [ -f /etc/os-release ]; then
     source /etc/os-release
     case "$ID" in
     ubuntu|debian)
-        apt install -y wget tar systemd
+        apt install -y wget curl tar systemd
         ;;
     arch|manjaro)
-        pacman -Sy --noconfirm wget tar systemd
+        pacman -Sy --noconfirm wget curl tar systemd
         ;;
     centos|rhel|fedora)
-        yum install -y wget tar systemd
+        yum install -y wget curl tar systemd
         ;;
     
     *)
@@ -163,6 +158,16 @@ if [ ! $update ];then
         systemctl daemon-reload
         systemctl start miaospeed
         systemctl enable miaospeed
+        IP=$(curl ip.sb)
+        IP6=$(curl -6 ip.sb)
+        echo "公网ipv4地址: ${IP}"
+        echo "公网ipv6地址: ${IP6}"
+        echo "如果无公网ip地址请无视上面的消息"
+        if [ "${mode}" == "token" ]; then
+            echo "token为:${token}"
+        else
+            echo "白名单botid列表:${botid}"
+        fi
         echo "可以使用 systemctl [start/restart/stop] miaospeed 来[启动/重启/停止]miaospeed"
     else
         echo "
@@ -183,6 +188,16 @@ if [ ! $update ];then
         chmod +x /etc/init.d/miaospeed
         /etc/init.d/miaospeed start
         /etc/init.d/miaospeed enable
+        IP=$(curl ip.sb)
+        IP6=$(curl -6 ip.sb)
+        echo "公网ipv4地址: ${IP}"
+        echo "公网ipv6地址: ${IP6}"
+        echo "如果无公网ip地址请无视上面的消息"
+        if [ "${mode}" == "token" ]; then
+            echo "token为:${token}"
+        else
+            echo "白名单botid列表:${botid}"
+        fi
         echo "可以使用 /etc/init.d/miaospeed [start/stop] miaospeed 来[启动/停止]miaospeed"
     fi
 fi
