@@ -60,10 +60,69 @@ example:
 
 > 设置miaospeed的测速线程数量
 
+**默认为64线程**
+
 example:
 
 ```shell
 --connthread 8
+```
+
+
+## --nospeed(可选)
+
+> 设置miaospeed为禁止测速(仅允许拓扑结构测试 流媒体测试等)
+
+example:
+
+```shell
+--nospeed
+```
+
+## --pausesecond(可选)
+
+> 设置miaospeed的每次测速任务后暂停时间段(单位:秒)
+
+example:
+
+```shell
+--pausesecond 60
+```
+
+## --speedlimit(可选)
+
+> 设置miaospeed的测速任务速度限制(单位:字节)
+
+example:
+
+```shell
+--speedlimit 1024000
+```
+
+## --verbose(可选)
+
+> 设置miaospeed记录日志
+
+example:
+
+```shell
+--verbose
+```
+## --mmdb(可选)
+
+> 将miaospeed的geoip查询重新路由到指定mmdb库
+
+**使用url并且未设置**`--path`参数会将mmdb库文件下载到:`/opt/miaospeed/Country.mmdb`**
+
+example:
+
+local
+```shell
+--mmdb /opt/miaospeed/Country.mmdb
+```
+url
+```shell
+--mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
 ```
 
 ## --mode
@@ -114,12 +173,12 @@ example:
 token模式:
 ```shell
 wget -O install.sh https://raw.githubusercontent.com/heinu123/install_miaospeed/main/install.sh
-bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode token --token miaospeed --mtls --connthread 8
+bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode token --token miaospeed --mtls --mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
 ```
 
 whitelist模式:
 ```shell
 wget -O install.sh https://raw.githubusercontent.com/heinu123/install_miaospeed/main/install.sh
-bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode whitelist --botid 114514 --mtls --connthread 8
+bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode whitelist --botid 114514 --mtls --mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
 ```
 

@@ -1,20 +1,18 @@
 #!/bin/bash
 
-
 # by https://github.com/heinu123
-
 
 if [ -f /etc/os-release ]; then
     source /etc/os-release
     case "$ID" in
     ubuntu|debian)
-        apt install -y wget curl tar systemd
+        apt install -y wget tar systemd
         ;;
     arch|manjaro)
-        pacman -Sy --noconfirm wget curl tar systemd
+        pacman -Sy --noconfirm wget tar systemd
         ;;
     centos|rhel|fedora)
-        yum install -y wget curl tar systemd
+        yum install -y wget tar systemd
         ;;
     
     *)
@@ -35,49 +33,73 @@ if [[ "$#" == 0 ]];then
     echo "参数不可为空!"
     exit 0
 fi
-while [[ "$#" -gt 0 ]]; do
+
+while [[ $# -gt 0 ]]; do
     case $1 in
         --url)
             url="$2"
-            shift
+            shift 2
             ;;
         --path)
             install_path="$2"
-            shift
+            shift 2
             ;;
         --update)
             update=true
             shift
             ;;
         --mtls)
-            mtls="-mtls"
+            mtls=" -mtls"
+            shift
+            ;;
+        --nospeed)
+            nospeed=" -nospeed"
+            shift
+            ;;
+        --pausesecond)
+            pausesecond=" -pausesecond $2"
+            shift 2
+            ;;
+        --speedlimit)
+            speedlimit=" -speedlimit $2"
+            shift 2
+            ;;
+        --verbose)
+            verbose=" -verbose"
             shift
             ;;
         --port)
             port="$2"
-            shift
+            shift 2
             ;;
         --connthread)
-            connthread="-connthread $2"
-            shift
+            connthread=" -connthread $2"
+            shift 2
+            ;;
+        --mmdb)
+            mmdb="$2"
+            shift 2
             ;;
         --mode)
             mode="$2"
-            shift
+            shift 2
             ;;
         --token)
             token="$2"
-            shift
+            shift 2
             ;;
         --botid)
             botid="$2"
-            shift
+            shift 2
             ;;
         *)
+            echo "未知参数: $1"
+            exit 1
             ;;
     esac
-    shift
 done
+
+
 if [ ! "$url" ]; then
     echo "--url参数不可为空!"
     exit 1
@@ -102,6 +124,17 @@ else
     fi
 fi
 
+if [ "$(echo $mmdb | grep '(http://|https://')" ]; then
+    wget --no-check-certificate -P ${install_path} -O ${install_path}/Country.mmdb ${url}
+    mode=${install_path}/Country.mmdb
+fi
+
+if [ "$mmdb" ]; then
+    if [ ! -f "$mmdb" ]; then
+        echo "--mmdb参数不可为路径或者不存在!"
+        exit 1
+    fi
+fi
 
 if [ "${mode}" == "token" ]; then
     if [ "${token}" == "" ]; then
@@ -119,10 +152,10 @@ else
     echo "无效的--mode参数"
     exit 0
 fi
+
 echo "miaospeed路径:${install_path}"
 
 echo "正在下载miaospeed..."
-mkdir ${install_path}
 cd ${install_path}
 wget --no-check-certificate -P ${install_path} -O ${install_path}/miaospeed.tar.gz ${url} 
 if [ -f ${install_path}/miaospeed.tar.gz ];then
@@ -140,6 +173,7 @@ else
     echo "解压miaospeed失败"
     exit 0
 fi
+
 if [ ! $update ];then
     if command -v systemctl &> /dev/null; then
         echo "systemctl命令存在 使用systemctl运行miaospeed"
@@ -153,7 +187,7 @@ if [ ! $update ];then
     [Service]
     Type=simple
     WorkingDirectory=${install_path}
-    ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port} ${mtls} ${config} ${connthread}
+    ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread} ${config}
     Restart=alway" > /etc/systemd/system/miaospeed.service
         systemctl daemon-reload
         systemctl start miaospeed
@@ -162,7 +196,6 @@ if [ ! $update ];then
         IP6=$(curl -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
         echo "公网ipv6地址: ${IP6}"
-        echo "如果无公网ip地址请无视上面的消息"
         if [ "${mode}" == "token" ]; then
             echo "token为:${token}"
         else
@@ -178,7 +211,7 @@ if [ ! $update ];then
     
     start() {
         echo 'Starting miaospeed'
-        ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port} ${mtls} ${config} ${connthread} &
+        ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread} ${config} &
     }
     
     stop() {
@@ -192,7 +225,6 @@ if [ ! $update ];then
         IP6=$(curl -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
         echo "公网ipv6地址: ${IP6}"
-        echo "如果无公网ip地址请无视上面的消息"
         if [ "${mode}" == "token" ]; then
             echo "token为:${token}"
         else
