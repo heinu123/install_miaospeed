@@ -2,32 +2,32 @@
 
 # by https://github.com/heinu123
 
-if [ -f /etc/os-release ]; then
-    source /etc/os-release
-    case "$ID" in
-    ubuntu|debian)
-        apt install -y wget tar systemd
-        ;;
-    arch|manjaro)
-        pacman -Sy --noconfirm wget tar systemd
-        ;;
-    centos|rhel|fedora)
-        yum install -y wget tar systemd
-        ;;
+# if [ -f /etc/os-release ]; then
+    # source /etc/os-release
+    # case "$ID" in
+    # ubuntu|debian)
+        # apt install -y wget tar systemd
+        # ;;
+    # arch|manjaro)
+        # pacman -Sy --noconfirm wget tar systemd
+        # ;;
+    # centos|rhel|fedora)
+        # yum install -y wget tar systemd
+        # ;;
     
-    *)
-        echo "不支持的linux发行版: $ID"
-        exit 1
-        ;;
-    esac
-else
-    if uname -a | grep -q "OpenWrt"; then
-        opkg install wget tar systemd
-    else
-        echo "无法检测到Linux发行版."
-        exit 1
-    fi
-fi
+    # *)
+        # echo "不支持的linux发行版: $ID"
+        # exit 1
+        # ;;
+    # esac
+# else
+    # if uname -a | grep -q "OpenWrt"; then
+        # opkg install wget tar systemd
+    # else
+        # echo "无法检测到Linux发行版."
+        # exit 1
+    # fi
+# fi
 
 if [[ "$#" == 0 ]];then
     echo "参数不可为空!"
@@ -116,17 +116,28 @@ if [ ! "$mode" ]; then
 fi
 
 if [ ! "$install_path" ]; then
-    install_path="/opt/miaospeed"
+    if [ -d "/opt" ];then
+        install_path="/opt/miaospeed"
+        mkdir ${install_path}
+    else
+        echo "/opt目录不存在 将在当前目录安装"
+        install_path="$(pwd)/miaospeed"
+        mkdir ${install_path}
+    fi
 else
+    if [ "$(echo $install_path | grep "\.")" ];then
+        echo "安装路径必须为绝对路径"
+        exit 1
+    fi
     if [ ! -d "$install_path" ]; then
         echo "--path参数必须为路径!"
         exit 1
     fi
 fi
 
-if [ "$(echo $mmdb | grep '(http://|https://')" ]; then
+if [ '$(echo $mmdb | grep "(http://|https://")' ]; then
     wget --no-check-certificate -P ${install_path} -O ${install_path}/Country.mmdb ${url}
-    mode=${install_path}/Country.mmdb
+    mmdb=${install_path}/Country.mmdb
 fi
 
 if [ "$mmdb" ]; then
