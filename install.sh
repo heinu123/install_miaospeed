@@ -136,7 +136,8 @@ else
 fi
 
 if [ '$(echo $mmdb | grep "(http://|https://")' ]; then
-    wget --no-check-certificate -P ${install_path} -O ${install_path}/Country.mmdb ${$mmdb}
+    echo "正在下载mmdb数据库..."
+    wget --no-check-certificate -P ${install_path} -O ${install_path}/Country.mmdb ${mmdb}
     mmdb=${install_path}/Country.mmdb
 fi
 
