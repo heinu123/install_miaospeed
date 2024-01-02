@@ -206,8 +206,8 @@ if [ ! $update ];then
         systemctl daemon-reload
         systemctl start miaospeed
         systemctl enable miaospeed
-        IP=$(curl ip.sb)
-        IP6=$(curl -6 ip.sb)
+        IP=$(curl -sL ip.sb)
+        IP6=$(curl -sL -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
         echo "公网ipv6地址: ${IP6}"
         if [ "${mode}" == "token" ]; then
@@ -215,7 +215,8 @@ if [ ! $update ];then
         else
             echo "白名单botid列表:${botid}"
         fi
-        echo "可以使用 systemctl [start/restart/stop] miaospeed 来[启动/重启/停止]miaospeed"
+        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
+        echo "可以使用 systemctl [start/restart/stop/status] miaospeed 来[启动/重启/停止/查看运行状态]miaospeed"
     else
         echo "#!/bin/bash
 
@@ -256,8 +257,8 @@ exit 0"> /etc/init.d/miaospeed
         chmod +x /etc/init.d/miaospeed
         /etc/init.d/miaospeed start
         /etc/init.d/miaospeed enable
-        IP=$(curl ip.sb)
-        IP6=$(curl -6 ip.sb)
+        IP=$(curl -sL ip.sb)
+        IP6=$(curl -sL -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
         echo "公网ipv6地址: ${IP6}"
         if [ "${mode}" == "token" ]; then
@@ -265,6 +266,7 @@ exit 0"> /etc/init.d/miaospeed
         else
             echo "白名单botid列表:${botid}"
         fi
+        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
         echo "可以使用 /etc/init.d/miaospeed [start/stop] miaospeed 来[启动/停止]miaospeed"
     fi
 fi
