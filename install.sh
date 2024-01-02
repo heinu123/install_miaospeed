@@ -136,7 +136,7 @@ else
 fi
 
 if [ '$(echo $mmdb | grep "(http://|https://")' ]; then
-    wget --no-check-certificate -P ${install_path} -O ${install_path}/Country.mmdb ${url}
+    wget --no-check-certificate -P ${install_path} -O ${install_path}/Country.mmdb ${$mmdb}
     mmdb=${install_path}/Country.mmdb
 fi
 
@@ -145,7 +145,7 @@ if [ "$mmdb" ]; then
         echo "--mmdb参数不可为路径或者不存在!"
         exit 1
     else
-    mmdb=" -mmdb ${mmdb}"
+    mmdb="-mmdb ${mmdb}"
     fi
 fi
 
