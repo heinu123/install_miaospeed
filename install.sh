@@ -2,32 +2,32 @@
 
 # by https://github.com/heinu123
 
-# if [ -f /etc/os-release ]; then
-    # source /etc/os-release
-    # case "$ID" in
-    # ubuntu|debian)
-        # apt install -y wget tar systemd
-        # ;;
-    # arch|manjaro)
-        # pacman -Sy --noconfirm wget tar systemd
-        # ;;
-    # centos|rhel|fedora)
-        # yum install -y wget tar systemd
-        # ;;
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+    case "$ID" in
+    ubuntu|debian)
+        apt install -y wget tar systemd
+        ;;
+    arch|manjaro)
+        pacman -Sy --noconfirm wget tar systemd
+        ;;
+    centos|rhel|fedora)
+        yum install -y wget tar systemd
+        ;;
     
-    # *)
-        # echo "不支持的linux发行版: $ID"
-        # exit 1
-        # ;;
-    # esac
-# else
-    # if uname -a | grep -q "OpenWrt"; then
-        # opkg install wget tar systemd
-    # else
-        # echo "无法检测到Linux发行版."
-        # exit 1
-    # fi
-# fi
+    *)
+        echo "不支持的linux发行版: $ID"
+        exit 1
+        ;;
+    esac
+else
+    if uname -a | grep -q "OpenWrt"; then
+        opkg install wget tar systemd
+    else
+        echo "无法检测到Linux发行版."
+        exit 1
+    fi
+fi
 
 if [[ "$#" == 0 ]];then
     echo "参数不可为空!"
@@ -144,6 +144,8 @@ if [ "$mmdb" ]; then
     if [ ! -f "$mmdb" ]; then
         echo "--mmdb参数不可为路径或者不存在!"
         exit 1
+    else
+    mmdb="-mmdb ${mmdb}"
     fi
 fi
 
@@ -198,7 +200,7 @@ if [ ! $update ];then
     [Service]
     Type=simple
     WorkingDirectory=${install_path}
-    ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread} ${config}
+    ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}
     Restart=alway" > /etc/systemd/system/miaospeed.service
         systemctl daemon-reload
         systemctl start miaospeed
@@ -214,21 +216,42 @@ if [ ! $update ];then
         fi
         echo "可以使用 systemctl [start/restart/stop] miaospeed 来[启动/重启/停止]miaospeed"
     else
-        echo "
-    #!/bin/sh /etc/rc.common
-    
-    START=99
-    STOP=10
-    
-    start() {
-        echo 'Starting miaospeed'
-        ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread} ${config} &
-    }
-    
-    stop() {
-        echo 'Stopping miaospeed'
-        killall -9 miaospeed.meta
-    }"> /etc/init.d/miaospeed
+        echo "#!/bin/bash
+
+START=99
+STOP=10
+
+start() {
+    echo 'Starting miaospeed'
+    ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} &
+}
+
+stop() {
+    echo 'Stopping miaospeed'
+    killall -9 miaospeed.meta
+}
+
+case \"\$1\" in
+  start)
+    # Start the service
+    start
+    ;;
+  stop)
+    # Stop the service
+    stop
+    ;;
+  restart)
+    # Restart the service
+    stop
+    start
+    ;;
+  *)
+    echo 'Usage: \$0 {start|stop|restart}'
+    exit 1
+    ;;
+esac
+
+exit 0"> /etc/init.d/miaospeed
         chmod +x /etc/init.d/miaospeed
         /etc/init.d/miaospeed start
         /etc/init.d/miaospeed enable
