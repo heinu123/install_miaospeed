@@ -146,7 +146,7 @@ if [ "$mmdb" ]; then
         echo "--mmdb参数不可为路径或者不存在!"
         exit 1
     else
-    mmdb="-mmdb ${mmdb}"
+    mmdb=" -mmdb ${mmdb}"
     fi
 fi
 
