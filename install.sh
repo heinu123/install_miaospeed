@@ -180,9 +180,10 @@ else
     echo "下载miaospeed失败"
     exit 0
 fi
-
-if [ -f ${install_path}/miaospeed.meta ];then
-    chmod +x ${install_path}/miaospeed.meta
+if [ -f ${install_path}/miaospeed.meta ]; then
+    miaospeed_bin=miaospeed.meta
+elif [ -f ${install_path}/miaospeed ]; then
+    miaospeed_bin=miaospeed
 else
     echo "解压miaospeed失败"
     exit 0
@@ -201,7 +202,7 @@ if [ ! $update ];then
     [Service]
     Type=simple
     WorkingDirectory=${install_path}
-    ExecStart=${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}
+    ExecStart=${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}
     Restart=alway" > /etc/systemd/system/miaospeed.service
         systemctl daemon-reload
         systemctl start miaospeed
@@ -215,7 +216,7 @@ if [ ! $update ];then
         else
             echo "白名单botid列表:${botid}"
         fi
-        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
+        echo "启动参数: ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
         echo "可以使用 systemctl [start/restart/stop/status] miaospeed 来[启动/重启/停止/查看运行状态]miaospeed"
     else
         echo "#!/bin/bash
@@ -225,12 +226,12 @@ STOP=10
 
 start() {
     echo 'Starting miaospeed'
-    ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} &
+    ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} &
 }
 
 stop() {
     echo 'Stopping miaospeed'
-    killall -9 miaospeed.meta
+    killall -9 ${miaospeed_bin}
 }
 
 case \"\$1\" in
