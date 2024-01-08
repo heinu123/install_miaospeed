@@ -23,6 +23,9 @@ if [ -f /etc/os-release ]; then
 else
     if uname -a | grep -q "OpenWrt"; then
         opkg install wget tar systemd
+    elif [ "$TERM_PROGRAM" = "termux" ]; then
+        pkg install wget tar -y
+        nohupstart=true
     else
         echo "无法检测到Linux发行版."
         exit 1
@@ -91,6 +94,10 @@ while [[ $# -gt 0 ]]; do
         --botid)
             botid="$2"
             shift 2
+            ;;
+        --nohup)
+            nohupstart=true
+            shift
             ;;
         *)
             echo "未知参数: $1"
@@ -218,6 +225,18 @@ if [ ! $update ];then
         fi
         echo "启动参数: ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
         echo "可以使用 systemctl [start/restart/stop/status] miaospeed 来[启动/重启/停止/查看运行状态]miaospeed"
+    elif [[ ${nohupstart} ]];then
+        echo "#!/bin/bash
+
+while true
+do
+    if ! ps aux | grep -q \"[${miaospeed_bin:0:1}]${miaospeed_bin:1}\"; then
+        nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} > miaospeed.log &
+    fi
+    sleep 60
+done">${install_path}/run.sh
+    source ${install_path}/run.sh
+    fi
     else
         echo "#!/bin/bash
 
@@ -225,12 +244,18 @@ START=99
 STOP=10
 
 start() {
-    echo 'Starting miaospeed'
-    ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} &
+    echo \"Starting miaospeed\"
+    while true
+    do
+        if ! ps aux | grep -q \"[${miaospeed_bin:0:1}]${miaospeed_bin:1}\"; then
+            nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} > miaospeed.log &
+        fi
+        sleep 60
+    done
 }
 
 stop() {
-    echo 'Stopping miaospeed'
+    echo \"Stopping miaospeed\"
     killall -9 ${miaospeed_bin}
 }
 
