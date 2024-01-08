@@ -203,7 +203,7 @@ if [ ! $update ];then
     Type=simple
     WorkingDirectory=${install_path}
     ExecStart=${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}
-    Restart=alway" > /etc/systemd/system/miaospeed.service
+    Restart=always" > /etc/systemd/system/miaospeed.service
         systemctl daemon-reload
         systemctl start miaospeed
         systemctl enable miaospeed
@@ -257,7 +257,7 @@ esac
 exit 0"> /etc/init.d/miaospeed
         chmod +x /etc/init.d/miaospeed
         /etc/init.d/miaospeed start
-        /etc/init.d/miaospeed enable
+        sudo update-rc.d miaospeed defaults
         IP=$(curl -sL ip.sb)
         IP6=$(curl -sL -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
