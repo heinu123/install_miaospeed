@@ -236,7 +236,7 @@ do
     sleep 60
 done">${install_path}/run.sh
     source ${install_path}/run.sh
-    fi
+    
     else
         echo "#!/bin/bash
 
