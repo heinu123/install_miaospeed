@@ -36,7 +36,7 @@ if [[ "$#" == 0 ]];then
     echo "参数不可为空!"
     exit 0
 fi
-
+config=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --url)
@@ -83,16 +83,12 @@ while [[ $# -gt 0 ]]; do
             mmdb="$2"
             shift 2
             ;;
-        --mode)
-            mode="$2"
-            shift 2
-            ;;
         --token)
             token="$2"
             shift 2
             ;;
-        --botid)
-            botid="$2"
+        --whitelist)
+            whitelist="$2"
             shift 2
             ;;
         --nohup)
@@ -117,10 +113,6 @@ if [ ! "$port" ]; then
     exit 1
 fi
 
-if [ ! "$mode" ]; then
-    echo "--mode参数不可为空!"
-    exit 1
-fi
 
 if [ ! "$install_path" ]; then
     if [ -d "/opt" ];then
@@ -157,21 +149,11 @@ if [ "$mmdb" ]; then
     fi
 fi
 
-if [ "${mode}" == "token" ]; then
-    if [ "${token}" == "" ]; then
-        echo "--token参数不可为空!"
-        exit 0
-    fi
-    config="-token ${token}"
-elif [ "${mode}" == "whitelist" ]; then
-    if [ "${botid}" == "" ]; then
-        echo "--botid参数不可为空!"
-        exit 0
-    fi
-    config="-whitelist ${botid}"
-else
-    echo "无效的--mode参数"
-    exit 0
+if [ "${token}" != "" ]; then
+    config="${config} -token ${token}"
+fi
+if [ "${whitelist}" != "" ]; then
+    config="${config} -whitelist ${whitelist}"
 fi
 
 echo "miaospeed路径:${install_path}"
@@ -209,7 +191,7 @@ if [ ! $update ];then
     [Service]
     Type=simple
     WorkingDirectory=${install_path}
-    ExecStart=${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}
+    ExecStart=${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}
     Restart=always" > /etc/systemd/system/miaospeed.service
         systemctl daemon-reload
         systemctl start miaospeed
@@ -218,12 +200,13 @@ if [ ! $update ];then
         IP6=$(curl -sL -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
         echo "公网ipv6地址: ${IP6}"
-        if [ "${mode}" == "token" ]; then
+        if [ "${token}" != "" ]; then
             echo "token为:${token}"
-        else
+        fi
+        if [ "${whitelist}" != "" ]; then
             echo "白名单botid列表:${botid}"
         fi
-        echo "启动参数: ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
+        echo "启动参数: ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}"
         echo "可以使用 systemctl [start/restart/stop/status] miaospeed 来[启动/重启/停止/查看运行状态]miaospeed"
     elif [[ ${nohupstart} ]];then
         echo "#!/bin/bash
@@ -231,12 +214,12 @@ if [ ! $update ];then
 while true
 do
     if ! ps aux | grep -q \"[${miaospeed_bin:0:1}]${miaospeed_bin:1}\"; then
-        nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} > miaospeed.log &
+        nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config} > miaospeed.log &
     fi
     sleep 60
 done">${install_path}/run.sh
     source ${install_path}/run.sh
-    
+    echo "$(cat ${install_path}/run.sh)
     else
         echo "#!/bin/bash
 
@@ -248,7 +231,7 @@ start() {
     while true
     do
         if ! ps aux | grep -q \"[${miaospeed_bin:0:1}]${miaospeed_bin:1}\"; then
-            nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config} > miaospeed.log &
+            nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config} > miaospeed.log &
         fi
         sleep 60
     done
@@ -287,12 +270,13 @@ exit 0"> /etc/init.d/miaospeed
         IP6=$(curl -sL -6 ip.sb)
         echo "公网ipv4地址: ${IP}"
         echo "公网ipv6地址: ${IP6}"
-        if [ "${mode}" == "token" ]; then
+        if [ "${token}" != "" ]; then
             echo "token为:${token}"
-        else
+        fi
+        if [ "${whitelist}" != "" ]; then
             echo "白名单botid列表:${botid}"
         fi
-        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb} ${config}"
+        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}"
         echo "可以使用 /etc/init.d/miaospeed [start/stop] miaospeed 来[启动/停止]miaospeed"
     fi
 fi

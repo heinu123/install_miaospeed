@@ -125,30 +125,9 @@ url
 --mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
 ```
 
-## --mode
-
-> 设置miaospeed运行模式
-
-有`token`和`whitelist`两种运行模式
-
-
-example(token):
-
-```shell
---mode token
-```
-
-example(whitelist):
-
-```shell
---mode token
-```
-
 ## --token
 
-> 设置miaospeed的token
-
-**当**`mode`**参数为** `token`**有效**
+> 设置miaospeed的加密token
 
 example:
 
@@ -156,29 +135,30 @@ example:
 --token miaospeed
 ```
 
-## --botid
+## --whitelist
 
 > 设置miaospeed的白名单bot id
-
-**当**`mode`**参数为** `whitelist`**有效**
 
 example:
 
 ```shell
---mtls
+--whitelist 123456,78910
+```
+
+
+## --nohup
+
+> 使用nohup运行
+
+example:
+
+```shell
+--nohup
 ```
 
 # Example
 
-token模式:
 ```shell
 wget -O install.sh https://raw.githubusercontent.com/heinu123/install_miaospeed/main/install.sh
-bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode token --token miaospeed --mtls --mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
+bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --token miaospeed --mtls --mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
 ```
-
-whitelist模式:
-```shell
-wget -O install.sh https://raw.githubusercontent.com/heinu123/install_miaospeed/main/install.sh
-bash install.sh --url https://github.com/moshaoli688/miaospeed/releases/download/v4.3.6/miaospeed_4.3.6_linux_amd64.tar.gz --port 9855 --mode whitelist --botid 114514 --mtls --mmdb https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb
-```
-
