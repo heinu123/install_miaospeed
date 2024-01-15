@@ -219,7 +219,7 @@ do
     sleep 60
 done">${install_path}/run.sh
     source ${install_path}/run.sh
-    echo "$(cat ${install_path}/run.sh)
+    echo "bash ${install_path}/run.sh">>/etc/rc.local
     else
         echo "#!/bin/bash
 
