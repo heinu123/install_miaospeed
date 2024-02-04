@@ -179,58 +179,97 @@ else
 fi
 
 if [ ! $update ];then
+    IP=$(curl -sL ip.sb)
+    IP6=$(curl -sL -6 ip.sb)
+    echo "公网ipv4地址: ${IP}"
+    echo "公网ipv6地址: ${IP6}"
+    echo "端口∶${port}"
+    if [ "${token}" != "" ]; then
+        echo "token为:${token}"
+    fi
+    if [ "${whitelist}" != "" ]; then
+        echo "白名单botid列表:${botid}"
+    fi
+    echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}"
+
     if command -v systemctl &> /dev/null; then
         echo "systemctl命令存在 使用systemctl运行miaospeed"
-        echo "[Unit]\nDescription=miaospeed\nAfter=network.target\n\n\n[Install]\nWantedBy=multi-user.target\n\n\n[Service]\nType=simple\nWorkingDirectory=${install_path}\nExecStart=${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}\nRestart=always" > /etc/systemd/system/miaospeed.service
+cat > /etc/systemd/system/miaospeed.service << EOF
+[Unit]
+Description=miaospeed
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+WorkingDirectory=${install_path}
+ExecStart=${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}
+Restart=always
+EOF
         systemctl daemon-reload
         systemctl start miaospeed
         systemctl enable miaospeed
-        IP=$(curl -sL ip.sb)
-        IP6=$(curl -sL -6 ip.sb)
-        echo "公网ipv4地址: ${IP}"
-        echo "公网ipv6地址: ${IP6}"
-        echo "端口∶${port}"
-        if [ "${token}" != "" ]; then
-            echo "token为:${token}"
-        fi
-        if [ "${whitelist}" != "" ]; then
-            echo "白名单botid列表:${botid}"
-        fi
-        echo "启动参数: ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}"
         echo "可以使用 systemctl [start/restart/stop/status] miaospeed 来[启动/重启/停止/查看运行状态]miaospeed"
     elif [[ ${nohupstart} ]];then
-        echo "#!/bin/bash\n\n\nwhile true\ndo\n    if ! ps aux | grep -q \"[${miaospeed_bin:0:1}]${miaospeed_bin:1}\"; then\n        nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config} > miaospeed.log &\n    fi\n    sleep 60\ndone">${install_path}/run.sh
+cat >${install_path}/run.sh << EOF
+#!/bin/bash
+while true
+do
+    if ! ps aux | grep -q "[${miaospeed_bin:0:1}]${miaospeed_bin:1}"; then
+        nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config} > miaospeed.log &
+    fi
+    sleep 60
+done
+EOF
         source ${install_path}/run.sh
         echo "bash ${install_path}/run.sh">>/etc/rc.local
-        IP=$(curl -sL ip.sb)
-        IP6=$(curl -sL -6 ip.sb)
-        echo "公网ipv4地址: ${IP}"
-        echo "公网ipv6地址: ${IP6}"
-        echo "端口∶${port}"
-        if [ "${token}" != "" ]; then
-            echo "token为:${token}"
-        fi
-        if [ "${whitelist}" != "" ]; then
-            echo "白名单botid列表:${botid}"
-        fi
-        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}"
     else
-        echo "#!/bin/bash\n\n\nSTART=99\nSTOP=10\n\n\nstart() {\n    echo \"Starting miaospeed\"\n    while true\n    do\n        if ! ps aux | grep -q \"[${miaospeed_bin:0:1}]${miaospeed_bin:1}\"; then\n            nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config} > miaospeed.log &\n        fi\n        sleep 60\n    done\n}\n\n\nstop() {\n    echo \"Stopping miaospeed\"\n    killall -9 ${miaospeed_bin}\n}\n\n\ncase \"\$1\" in\n  start)\n    # Start the service\n    start\n    ;;\n  stop)\n    # Stop the service\n    stop\n    ;;\n  restart)\n    # Restart the service\n    stop\n    start\n    ;;\n  *)\n    echo 'Usage: \$0 {start|stop|restart}'\n    exit 1\n    ;;\nesac\n\nexit 0"> /etc/init.d/miaospeed
+cat > /etc/init.d/miaospeed << EOF
+#!/bin/bash
+START=99
+STOP=10
+
+start() {
+    echo "Starting miaospeed"
+    while true
+    do
+        if ! ps aux | grep -q "[${miaospeed_bin:0:1}]${miaospeed_bin:1}"; then
+            nohup ${install_path}/${miaospeed_bin} server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config} > miaospeed.log &
+        fi
+        sleep 60
+    done
+}
+
+stop() {
+    echo "Stopping miaospeed"
+    killall -9 ${miaospeed_bin}
+}
+
+case "$1" in
+  start)
+    # Start the service
+    start
+    ;;
+  stop)
+    # Stop the service
+    stop
+    ;;
+  restart)
+    # Restart the service
+    stop
+    start
+    ;;
+  *)
+    echo 'Usage: $0 {start|stop|restart}'
+    exit 1
+    ;;
+esac
+EOF
         chmod +x /etc/init.d/miaospeed
         /etc/init.d/miaospeed start
         sudo update-rc.d miaospeed defaults
-        IP=$(curl -sL ip.sb)
-        IP6=$(curl -sL -6 ip.sb)
-        echo "公网ipv4地址: ${IP}"
-        echo "公网ipv6地址: ${IP6}"
-        echo "端口∶${port}"
-        if [ "${token}" != "" ]; then
-            echo "token为:${token}"
-        fi
-        if [ "${whitelist}" != "" ]; then
-            echo "白名单botid列表:${botid}"
-        fi
-        echo "启动参数: ${install_path}/miaospeed.meta server -bind 0.0.0.0:${port}${mtls}${verbose}${nospeed}${pausesecond}${speedlimit}${connthread}${mmdb}${config}"
         echo "可以使用 /etc/init.d/miaospeed [start/stop] miaospeed 来[启动/停止]miaospeed"
     fi
 fi
