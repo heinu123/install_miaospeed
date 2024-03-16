@@ -108,7 +108,7 @@ if [ ! "$url" ]; then
     exit 1
 fi
 
-if [ ! "$port" ]; then
+if [ ! "$port" ] || [ $update != true ]; then
     echo "--port参数不可为空!"
     exit 1
 fi
@@ -178,7 +178,7 @@ else
     exit 0
 fi
 
-if [ ! $update ];then
+if [ $update != true ];then
     IP=$(curl -sL ip.sb)
     IP6=$(curl -sL -6 ip.sb)
     echo "公网ipv4地址: ${IP}"
