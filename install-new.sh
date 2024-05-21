@@ -8,7 +8,7 @@ if [[ "$#" == 0 ]];then
 fi
 config=""
 update=""
-
+mmdburl="https://jsd.onmicrosoft.cn/gh/Loyalsoldier/geoip@release/Country.mmdb"
 
 main() {
     Update_system
@@ -42,7 +42,7 @@ main() {
     
     if [ "$mmdb" ]; then
         if [ ! -f "$mmdb" ]; then
-            echo "--mmdb参数不可为路径或者不存在!"
+            echo "--mmdb 文件不存在!"
             exit 1
         else
         mmdb=" -mmdb ${mmdb}"
@@ -201,6 +201,9 @@ Get_parameter() {
     if [ "$url" == "" ]; then
         echo "--url参数不可为空!"
         exit 1
+    fi
+    if [ "$mmdb" == "loyalsoldier" ]; then
+        mmdb=$mmdburl
     fi
     
     if [ "$port" == "" ] || [ $update != "true" ]; then
