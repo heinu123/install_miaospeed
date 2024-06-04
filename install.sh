@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --update)
-            update="true"
+            update=true
             shift
             ;;
         --mtls)
@@ -109,7 +109,7 @@ if [ ! "$url" ]; then
     exit 1
 fi
 
-if [ ! "$port" ] || [ $update != "true" ]; then
+if [ ! "$port" ] || [ ! $update ]; then
     echo "--port参数不可为空!"
     exit 1
 fi
@@ -179,7 +179,7 @@ else
     exit 0
 fi
 
-if [ $update != "true" ];then
+if [ ! $update  ];then
     IP=$(curl -sL ip.sb)
     IP6=$(curl -sL -6 ip.sb)
     echo "公网ipv4地址: ${IP}"
