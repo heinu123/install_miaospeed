@@ -21,7 +21,7 @@ if [ -f /etc/os-release ]; then
         ;;
     esac
 else
-    if [ $(uname -a | grep -q "OpenWrt") ] && [ $(uname -a | grep -q "openwrt") ]; then
+    if [ $(uname -a | grep -q "OpenWrt") ] || [ $(uname -a | grep -q "openwrt") ]; then
         opkg install wget tar systemd
     elif [ "$TERM_PROGRAM" = "termux" ]; then
         pkg install wget tar -y
