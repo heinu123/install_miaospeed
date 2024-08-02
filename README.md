@@ -2,4 +2,4 @@
 一键安装miaospeed脚本
 
 教程见
-www.heinu.cc/archives/85
+https://blog.heinu.cc/posts/default/install_miaospeed
