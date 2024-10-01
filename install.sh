@@ -14,7 +14,9 @@ if [ -f /etc/os-release ]; then
     centos|rhel|fedora)
         yum install -y wget tar systemd
         ;;
-    
+    OpenWrt|openwrt)
+        opkg install wget tar systemd
+        ;;
     *)
         echo "不支持的linux发行版: $ID"
         exit 1
